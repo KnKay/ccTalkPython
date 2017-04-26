@@ -9,10 +9,9 @@ We wil lread out the name of the unit etc.
 if __name__ == "__main__":
     print("This is a simple demo")
     print (ccTalk_Bus.list_available_ports())
-    #port = input("Please enter name of port to be used: \n").upper()
-    #print (port, " will be used")
-    #Read unit info as demo
-    bus = ccTalk_Bus("COM4")
+    port = input("Please enter name of port to be used: \n").upper()
+    print (port, " will be used")
+    bus = ccTalk_Bus(port)
     bus.close()
     bus.initialize()
     bus.open()
