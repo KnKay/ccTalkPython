@@ -1,8 +1,6 @@
 '''
 We define a class of ccTalk_Message. 
 
-
-
 '''
 
 
@@ -21,7 +19,7 @@ class ccTalk_Message:
     def get_payload_from_bytes(bytes:bytes):
         if bytes[1] == 0:
             return []
-        return bytes[3:-2] #return a sub array holding the payload
+        return bytes[4:-1] #return a sub array holding the payload
 
     @staticmethod
     def verify_simple_checksum_from_bytes(bytes:bytes):
@@ -34,14 +32,44 @@ class ccTalk_Message:
             return True
         return False
 
+    @staticmethod
+    def simple_checksum_from_bytes(bytes:bytes):
+        #Add all numbers
+        value = 0
+        for byte in bytes:
+            value = value+byte
+        value = value%256
+        if value is 0:
+            return True
+        return False
 
-    def __init__(self, src:int=1, dest:int=2,payload=bytes):
+    @classmethod
+    def from_bytes(cls, bytes):
+        payload = ccTalk_Message.get_payload_from_bytes(bytes)
+        if bytes[1] != len(payload):
+            return False
+        dest = bytes[0]
+        src = bytes[2]
+        header = bytes[3]
+        return ccTalk_Message(src,dest,header,payload)
+
+
+    def __init__(self, src:int=1, dest:int=2, header:int=0, payload=bytes, checksum:int=0):
         self.__payload = payload
+        self.__no_of_bytes = len(payload)
         self.__src = src
         self.__dest = dest
+        self.__header = header
+
 
     def __bytes__(self):
-        pass
+        data_array = [self.dest,self.__no_of_bytes,self.src,self.header]
+        for byte in self.payload:
+            data_array.append(byte)
+        data_array.append(self.checksum)
+        as_bytes = bytes(data_array)
+        return as_bytes
+
 
     #Setter and getter
     @property
@@ -55,3 +83,18 @@ class ccTalk_Message:
     @property
     def dest(self):
         return self.__dest
+
+    @property
+    def header(self):
+        return self.__header
+
+    @property
+    def checksum(self):
+        value = 0
+        value += self.dest
+        value += self.__no_of_bytes
+        value += self.src
+        value += self.header
+        for byte in self.payload:
+            value = value + byte
+        return 256-(value % 256)

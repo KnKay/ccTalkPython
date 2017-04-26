@@ -1,5 +1,6 @@
 import serial.tools.list_ports as list
 import serial
+from ccTalk.bus.ccTalk_Message import ccTalk_Message
 '''
 This class will handle the complete communication. 
 The method are tryied to be named like in my c++  implementation
@@ -52,6 +53,59 @@ class ccTalk_Bus:
     def close(self):
         self.port.close()
         return True
+
+    #We want to send a ccTalk_Message where only ack is expected
+    def send_cctalk_simple_message(self, message:ccTalk_Message):
+        #We send the bytes. Our serial is working in bytes!
+        if self.send_message_bytes(bytes(message)):
+            return ccTalk_Message.verify_from_bytes(self.read_bytes(5)) #We expect a correct ack
+
+
+    #We want to send a ccTalk_Message where we need an answer
+    def send_cctalk_request_message(self, message:ccTalk_Message):
+        #We send the bytes. Our serial is working in bytes!
+        if self.send_message_bytes(bytes(message)):
+            answer = self.read_bytes()
+            if ccTalk_Message.verify_from_bytes(answer):
+                return ccTalk_Message.from_bytes(answer)
+            return False
+
+    #We want to send a ccTalk_Message where only ack is expected
+    def send_bytes_simple_message(self, message:bytes):
+        #We send the bytes. Our serial is working in bytes!
+        if self.send_message_bytes(message):
+            return ccTalk_Message.verify_from_bytes(self.read_bytes(5)) #We expect a correct ack
+
+    #We want to send a ccTalk_Message where we need an answer
+    def send_bytes_request_message(self, message:bytes):
+        #We send the bytes. Our serial is working in bytes!
+        if self.send_message_bytes(bytes(message)):
+            answer = self.read_bytes()
+            if ccTalk_Message.verify_from_bytes(answer):
+                return answer
+            return False
+
+    #Send the byte array to the line
+    def send_message_bytes(self, message: bytes):
+        self.port.write(message)
+        return self.read_echo(message)
+
+    #Check is the echo is what we expected!
+    def read_echo(self, expect:bytes):
+        if (self.port.read(len(expect))==expect):
+            return True
+        return False
+
+    #read some bytes. This can be used for known and unknown length!
+    def read_bytes(self, len:int=0):
+        if len !=0:
+            return self.port.read(len)
+        #read 2 bytes. second is the expected number
+        first = self.port.read(2)
+        second = self.port.read(int(first[1])+3)
+        answer = bytes(first+second)
+        return answer
+
 
     #Following simple getter and setter
     @property
