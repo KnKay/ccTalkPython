@@ -33,6 +33,14 @@ class ccTalk_Message:
         return False
 
     @staticmethod
+    def make_simple_checksum_for_bytes(bytes:bytes):
+        #Add all numbers
+        value = 0
+        for byte in bytes:
+            value = value+byte
+        return 256 - (value % 256)
+
+    @staticmethod
     def simple_checksum_from_bytes(bytes:bytes):
         #Add all numbers
         value = 0

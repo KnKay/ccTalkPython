@@ -38,7 +38,7 @@ class ccTalk_Bus_Test(unittest.TestCase):
         if not self.portUnderTest.open():
             self.portUnderTest.open()
         test_message = ccTalk_Message.from_bytes(bytes([2, 0, 1, 245])) #Read equipment
-        self.assertEqual(self.portUnderTest.send_cctalk_request_message(test_message).__bytes__(),self.portUnderTest.send_bytes_request_message(bytes(test_message) ))
+        self.assertEqual(self.portUnderTest.send_cctalk_request_message(test_message).__bytes__(),self.portUnderTest.send_bytes_request_message(bytes(test_message)))
         self.assertEqual(self.portUnderTest.send_cctalk_request_message(test_message).payload.decode("UTF-8"), "Coin Acceptor")
         self.portUnderTest.close()
 
