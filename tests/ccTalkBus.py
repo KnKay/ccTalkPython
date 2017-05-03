@@ -38,11 +38,23 @@ class ccTalk_Bus_Test(unittest.TestCase):
         if not self.portUnderTest.open():
             self.portUnderTest.open()
         test_message = ccTalk_Message.from_bytes(bytes([2, 0, 1, 245])) #Read equipment
-        self.assertEqual(self.portUnderTest.send_cctalk_request_message(test_message).__bytes__(),self.portUnderTest.send_bytes_request_message(bytes(test_message)))
-        self.assertEqual(self.portUnderTest.send_cctalk_request_message(test_message).payload.decode("UTF-8"), "Coin Acceptor")
+        self.assertEqual(self.portUnderTest.send_cctalk_request_message(test_message).__bytes__(),
+                         self.portUnderTest.send_bytes_request_message(bytes(test_message)))
+        self.assertEqual(self.portUnderTest.send_cctalk_request_message(test_message).payload.decode("UTF-8"),
+                         "Coin Acceptor")
+        test_message = bytes([2, 0, 1, 245])
+        self.assertEqual(ccTalk_Message.get_payload_from_bytes(self.portUnderTest.send_bytes_request_message(test_message)).decode("UTF-8"),
+                         "Coin Acceptor")
         self.portUnderTest.close()
 
 
+    def test_sending_request_with_data(self):
+        if not self.portUnderTest.open():
+            self.portUnderTest.open()
+        byte_array = bytes([2, 1, 1, 184, 1])
+        self.assertEqual( (ccTalk_Message.get_payload_from_bytes
+               (self.portUnderTest.send_bytes_request_message(byte_array))).decode("UTF-8"),"EU050A")
+        self.portUnderTest.close()
 
 if __name__ == '__main__':
     unittest.main()

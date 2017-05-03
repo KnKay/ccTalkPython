@@ -1,2 +1,1 @@
 pyserial >= 3.0
-asciimatics >= 1.8.0

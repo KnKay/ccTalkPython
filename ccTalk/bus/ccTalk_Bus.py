@@ -72,6 +72,9 @@ class ccTalk_Bus:
 
     #We want to send a ccTalk_Message where only ack is expected
     def send_bytes_simple_message(self, message:bytes):
+        #make sure we have a checksum
+        if len(message) < message[1]+5:
+            message+=bytes([ccTalk_Message.make_simple_checksum_for_bytes(message)])
         #We send the bytes. Our serial is working in bytes!
         if self.send_message_bytes(message):
             return ccTalk_Message.verify_from_bytes(self.read_bytes(5)) #We expect a correct ack
