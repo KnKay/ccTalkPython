@@ -1,5 +1,5 @@
 from ccTalk.bus.ccTalk_Bus import ccTalk_Bus, ccTalk_Message
-import os
+import os, time
 #This is programming the file into our validator
 
 #We need to know which bus, which file, the address of the validator, the destination channel an package size
@@ -15,9 +15,10 @@ def program_rcp_file(bus:ccTalk_Bus, file:str, dest:int, channel:int, package_si
         Payload (Subheader)                 (Must be 255)
         checksum (will be calculated from bus implementation!)
     '''
-    if not bus.send_bytes_simple_message(bytes([dest,1,1,96,255])):
+    result = bus.send_bytes_simple_message(bytes([dest,1,1,96,255]))
+    if not result == True:
         #We need some better Failure Handling
-        print("Error during enter programming mode")
+        print("Error", result, "during enter programming mode")
         return False
 
     '''
@@ -46,7 +47,11 @@ def program_rcp_file(bus:ccTalk_Bus, file:str, dest:int, channel:int, package_si
                     checksum (will be calculated from bus implementation!)
                 '''
                 message = bytes([2,len(file_bytes)+1,1,96,254])+file_bytes
-                print(len(file_bytes), message, ccTalk_Message.make_simple_checksum_for_bytes(message))
+                result = bus.send_bytes_simple_message(message)
+                if not result == True:
+                    print ("Error", result, "during programming")
+                    return False
+                #print(len(file_bytes), message, ccTalk_Message.make_simple_checksum_for_bytes(message))
     if sent != file_size:
         print ("Error during file read")
         return False
@@ -54,10 +59,12 @@ def program_rcp_file(bus:ccTalk_Bus, file:str, dest:int, channel:int, package_si
     '''
     Finalize the upload. Send the endpacket programm header.
     '''
-    if not bus.send_bytes_simple_message(bytes([dest,2,1,96,253,channel])):
+    result = bus.send_bytes_simple_message(bytes([dest,2,1,96,253,channel]))
+    if not result == True:
         #We need some better Failure Handling
-        print("Error saving data")
+        print("Error", result, "saving data")
         return False
+    time.sleep(2)
     return True
 
 def rcp_erase_coin_channel(bus:ccTalk_Bus,dest:int, channel:int):
@@ -75,7 +82,7 @@ def rcp_erase_coin_channel(bus:ccTalk_Bus,dest:int, channel:int):
     result = bus.send_bytes_simple_message(bytes([dest,2,1,96,249,channel]))
     if result != True:
         #We need some better Failure Handling
-        print("Error during removal of coins")
-        print (result)
+        print("Error",result, "during removal of coins")
         return False
+    time.sleep(2)
     return True

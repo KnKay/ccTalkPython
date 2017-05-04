@@ -7,6 +7,7 @@ from ccTalk.helper.rcp import *
 #Used for file walking and finding files
 from pathlib import Path
 import os
+import time
 
 #The following is needed to determin what should be programmed.
 port= "COM4" # Nail this down for test!
@@ -24,10 +25,10 @@ bus.initialize()
 bus.open()
 
 #Read relevant information out of the coin Validator. This is used to determine the correct files.
-validator = ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([validator_address, 0, 1, 244]))).decode(("UTF-8"))
+validator = ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([validator_address, 0, 1, 244]))).decode("UTF-8")
 database_version = ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([validator_address, 0, 1, 243])))
 database_version = "Db-00"+str(int.from_bytes(database_version, byteorder='little')) # This is needed int python
-build_code = ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([validator_address, 0, 1, 192]))).decode(("UTF-8"))
+build_code = ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([validator_address, 0, 1, 192]))).decode("UTF-8")
 if validator == "SR5i":
     validator = "eagle"
 print("Connected :",validator,build_code,database_version)
@@ -59,8 +60,11 @@ print ("Channels in the unit: ")
 for channel in range(1,17):
     print (channel,"\t", ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([validator_address, 1, 1, 184, channel]))).decode("UTF-8"))
 
-channel = 20 #input("Please enter name of channel to be used: \n")
-channel = (int(channel))
-# program_rcp_file(bus,coinfile,validator_address,channel)
+channel = 10 #input("Please enter name of channel to be used: \n")
+channel = int(channel)
+if program_rcp_file(bus,coinfile,validator_address,channel)== True:
+    print ("Programmed channel",channel)
+    print(channel, "\t", ccTalk_Message.get_payload_from_bytes(
+        bus.send_bytes_request_message(bytes([validator_address, 1, 1, 184, channel]))).decode("UTF-8"))
 rcp_erase_coin_channel(bus,validator_address,channel)
 bus.close()

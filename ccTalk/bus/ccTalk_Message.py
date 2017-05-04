@@ -26,7 +26,6 @@ class ccTalk_Message:
             return False
         #We have a failure code if we have a payload!
         if message[1] != 0 :
-            print ("fehler")
             return message[4]
         return True
 
