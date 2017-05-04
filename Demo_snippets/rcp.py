@@ -15,6 +15,7 @@ port= "COM4" # Nail this down for test!
 #print("This is a simple demo")
 #print(ccTalk_Bus.list_available_ports())
 #port = input("Please enter name of port to be used: \n").upper()
+validator_address = 2
 rcp_file_root = os.path.expanduser("~")+os.sep+"Documents"+os.sep+"rcpdist"+os.sep+"files"+os.sep
 print (rcp_file_root)
 print(port, " will be used")
@@ -23,10 +24,10 @@ bus.initialize()
 bus.open()
 
 #Read relevant information out of the coin Validator. This is used to determine the correct files.
-validator = ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([2, 0, 1, 244]))).decode(("UTF-8"))
-database_version = ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([2, 0, 1, 243])))
+validator = ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([validator_address, 0, 1, 244]))).decode(("UTF-8"))
+database_version = ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([validator_address, 0, 1, 243])))
 database_version = "Db-00"+str(int.from_bytes(database_version, byteorder='little')) # This is needed int python
-build_code = ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([2, 0, 1, 192]))).decode(("UTF-8"))
+build_code = ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([validator_address, 0, 1, 192]))).decode(("UTF-8"))
 if validator == "SR5i":
     validator = "eagle"
 print("Connected :",validator,build_code,database_version)
@@ -56,9 +57,10 @@ coinfile = str(file_folder)+os.sep+coin
 
 print ("Channels in the unit: ")
 for channel in range(1,17):
-    print (channel,"\t", ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([2, 1, 1, 184, channel]))).decode("UTF-8"))
+    print (channel,"\t", ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([validator_address, 1, 1, 184, channel]))).decode("UTF-8"))
 
-channel = 10 #input("Please enter name of channel to be used: \n")
+channel = 20 #input("Please enter name of channel to be used: \n")
 channel = (int(channel))
-program_rcp_file(bus,coinfile,channel)
+# program_rcp_file(bus,coinfile,validator_address,channel)
+rcp_erase_coin_channel(bus,validator_address,channel)
 bus.close()

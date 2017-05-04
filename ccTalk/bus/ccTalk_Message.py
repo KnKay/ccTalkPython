@@ -13,6 +13,21 @@ class ccTalk_Message:
         #Check if the length is matching
         if not len(ccTalk_Message.get_payload_from_bytes(message)) == int(message[1]):
             return False
+        #If we have a return header different to 0 we return the failure
+        return True
+
+    #USe this method if you can things different to an ack.
+    @staticmethod
+    def verify_answer_bytes(message):
+        if not ((type(message) is bytes) or (type(message) is ccTalk_Message)):
+            return False
+        #Check if the length is matching
+        if not len(ccTalk_Message.get_payload_from_bytes(message)) == int(message[1]):
+            return False
+        #We have a failure code if we have a payload!
+        if message[1] != 0 :
+            print ("fehler")
+            return message[4]
         return True
 
     @staticmethod

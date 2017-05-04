@@ -13,14 +13,11 @@ The method are tryied to be named like in my c++  implementation
 class ccTalk_Bus:
     #List of all used ports
     _cctalk_open_ports__ = {}
-
     port = serial.Serial()
     _is_initialized = False
 
-
     def __init__(self,portname:str):
         self.portname = portname
-
 
     def __str__(self):
         return self.portname+" "+str(self.open)
@@ -58,7 +55,7 @@ class ccTalk_Bus:
     def send_cctalk_simple_message(self, message:ccTalk_Message):
         #We send the bytes. Our serial is working in bytes!
         if self.send_message_bytes(bytes(message)):
-            return ccTalk_Message.verify_from_bytes(self.read_bytes(5)) #We expect a correct ack
+            return ccTalk_Message.verify_answer_bytes(self.read_bytes()) #We expect a correct ack
 
 
     #We want to send a ccTalk_Message where we need an answer
@@ -77,7 +74,8 @@ class ccTalk_Bus:
             message+=bytes([ccTalk_Message.make_simple_checksum_for_bytes(message)])
         #We send the bytes. Our serial is working in bytes!
         if self.send_message_bytes(message):
-            return ccTalk_Message.verify_from_bytes(self.read_bytes(5)) #We expect a correct ack
+            return ccTalk_Message.verify_answer_bytes(self.read_bytes()) #We expect a correct ack
+        return False
 
     #We want to send a ccTalk_Message where we need an answer
     def send_bytes_request_message(self, message:bytes):
