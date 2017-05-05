@@ -37,14 +37,12 @@ print("Connected :",validator,build_code,database_version)
 rcp_file_root = Path(rcp_file_root+os.sep+validator+os.sep+"DE0"+os.sep+"Bin"+os.sep+database_version)
 #Check if the relevant data have a structure from a given root. The structure is aligned to the ccTalk Specification
 #If the path is valid we set our files root to this.
-
 print ("Available Consets:")
 for folder in [folder for folder in  rcp_file_root.glob('*') if folder.is_dir()]:
     print (str(folder).split(os.sep)[-1]) # Get only the Folder Name. This is our coinset
 
 
 #Ask for the Coinset, go into set and list coins. Ask the customer for the used channel
-
 coinset = input("Please enter name of coinset to be used: \n")
 file_folder = Path(str(rcp_file_root)+os.sep+coinset)
 print ("Available Coins:")
@@ -55,7 +53,6 @@ coinfile = str(file_folder)+os.sep+coin
 
 
 #Finally print an overview of what is now in the validator
-
 print ("Channels in the unit: ")
 for channel in range(1,17):
     print (channel,"\t", ccTalk_Message.get_payload_from_bytes(bus.send_bytes_request_message(bytes([validator_address, 1, 1, 184, channel]))).decode("UTF-8"))
